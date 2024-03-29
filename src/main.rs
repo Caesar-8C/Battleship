@@ -1,18 +1,21 @@
 mod bot;
 mod field;
 
+use std::env;
 use std::thread::sleep;
 use std::time::Duration;
 use crate::bot::Bot;
 use crate::bot::random::RandomBot;
 use crate::field::Field;
 
-fn play() -> i32 {
+fn play(draw: bool) -> i32 {
     let mut field = Field::new();
     field.fill();
     let mut bot = RandomBot::new();
 
-    // field.draw();
+    if draw {
+        field.draw();
+    }
 
     let mut turn_counter = 1;
 
@@ -22,8 +25,11 @@ fn play() -> i32 {
             turn_counter += 1;
         }
 
-        // sleep(Duration::from_millis(250));
-        // field.draw();
+        if draw {
+            sleep(Duration::from_millis(250));
+            field.draw();
+        }
+
         if field.game_over() {
             break;
         }
@@ -35,8 +41,14 @@ fn play() -> i32 {
 fn main() {
     let mut vec = Vec::with_capacity(1000);
 
-    for _ in 0..1000 {
-        vec.push(play());
+    let args: Vec<String> = env::args().collect();
+
+    if args.len() > 1 && args[1] == "draw" {
+        vec.push(play(true));
+    } else {
+        for _ in 0..1000 {
+            vec.push(play(false));
+        }
     }
 
     let sum: i32 = vec.iter().sum();
