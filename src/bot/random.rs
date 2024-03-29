@@ -1,5 +1,5 @@
 use crate::bot::{Bot, BotCell};
-use crate::{Field, FieldCell};
+use crate::{Field, field::FieldCell};
 use rand::Rng;
 
 pub struct RandomBot {
@@ -19,7 +19,7 @@ impl Bot for RandomBot {
         self.field = vec![vec![BotCell::Value(0); 10]; 10];
         for i in 0..10 {
             for j in 0..10 {
-                match field.get(i, j) {
+                match field.get(i as i32, j as i32).unwrap() {
                     FieldCell::Ship(true) => self.field[i][j] = BotCell::Hit,
                     FieldCell::NoShip(true) => self.field[i][j] = BotCell::Miss,
                     _ => (),
