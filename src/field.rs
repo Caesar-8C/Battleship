@@ -83,6 +83,14 @@ impl Coord {
             Right => Self { x: self.x, y: self.y + i },
         }
     }
+
+    pub fn x_u(&self) -> usize {
+        self.x as usize
+    }
+
+    pub fn y_u(&self) -> usize {
+        self.y as usize
+    }
 }
 
 pub struct Field(
@@ -111,12 +119,12 @@ impl Field {
         if !(0..=9).contains(&c.x) || !(0..=9).contains(&c.y) {
             None
         } else {
-            Some(self.0[c.x as usize][c.y as usize])
+            Some(self.0[c.x_u()][c.y_u()])
         }
     }
 
     fn set(&mut self, c: Coord, value: FieldCell) {
-        self.0[c.x as usize][c.y as usize] = value;
+        self.0[c.x_u()][c.y_u()] = value;
     }
 
     fn put_ship(&mut self, size: i32) {
