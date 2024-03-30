@@ -20,12 +20,12 @@ fn play(draw: bool) -> i32 {
     let mut turn_counter = 1;
 
     loop {
-        let (x, y) = bot.turn();
-        let shot_result = field.shoot(x, y);
+        let c = bot.turn();
+        let shot_result = field.shoot(c);
         if shot_result == ShotResult::Miss {
             turn_counter += 1;
         }
-        bot.shot_result(x, y, shot_result);
+        bot.shot_result(c, shot_result);
 
         if draw {
             sleep(Duration::from_millis(250));

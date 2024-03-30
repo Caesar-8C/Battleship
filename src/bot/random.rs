@@ -1,6 +1,6 @@
 use crate::bot::{Bot, BotCell};
 use rand::Rng;
-use crate::field::ShotResult;
+use crate::field::{Coord, ShotResult};
 
 pub struct RandomBot {
     field: Vec<Vec<BotCell>>,
@@ -15,21 +15,23 @@ impl RandomBot {
 }
 
 impl Bot for RandomBot {
-    fn turn(&mut self) -> (i32, i32) {
+    fn turn(&mut self) -> Coord {
         let mut rng = rand::thread_rng();
         loop {
-            let (x, y): (usize, usize) = (rng.gen::<usize>()%10, rng.gen::<usize>()%10);
-            if let BotCell::Value(_) = self.field[x][y] {
-                return (x as i32, y as i32);
+            let (x, y) = (rng.gen_range(0..10), rng.gen_range(0..10));
+            if let BotCell::Value(_) = self.field[x as usize][y as usize] {
+                return Coord{x, y};
             }
         }
     }
 
-    fn shot_result(&mut self, x: i32, y: i32, result: ShotResult) {
+    fn shot_result(&mut self, c: Coord, result: ShotResult) {
         match result {
-            ShotResult::Hit => self.field[x as usize][y as usize] = BotCell::Hit,
-            ShotResult::Miss => self.field[x as usize][y as usize] = BotCell::Miss,
-            _ => (),
+            ShotResult::Hit => self.field[c.x as usize][c.y as usize] = BotCell::Hit,
+            ShotResult::Miss => self.field[c.x as usize][c.y as usize] = BotCell::Miss,
+            ShotResult::Kill => {
+                self.field[c.x as usize][c.y as usize] = BotCell::Hit;
+            }
         }
     }
 }

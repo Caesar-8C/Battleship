@@ -1,6 +1,6 @@
 pub mod random;
 
-use crate::field::ShotResult;
+use crate::field::{Coord, ShotResult};
 
 #[derive(Clone, Copy)]
 enum BotCell {
@@ -10,7 +10,7 @@ enum BotCell {
 }
 
 pub trait Bot {
-    fn turn(&mut self) -> (i32, i32);
+    fn turn(&mut self) -> Coord;
 
-    fn shot_result(&mut self, x: i32, y: i32, result: ShotResult);
+    fn shot_result(&mut self, c: Coord, result: ShotResult);
 }
