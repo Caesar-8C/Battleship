@@ -6,7 +6,7 @@ use std::thread::sleep;
 use std::time::Duration;
 use crate::bot::Bot;
 use crate::bot::random::RandomBot;
-use crate::field::Field;
+use crate::field::{Field, ShotResult};
 
 fn play(draw: bool) -> i32 {
     let mut field = Field::new();
@@ -20,10 +20,12 @@ fn play(draw: bool) -> i32 {
     let mut turn_counter = 1;
 
     loop {
-        let (x, y) = bot.turn(&field);
-        if !field.shoot(x, y) {
+        let (x, y) = bot.turn();
+        let shot_result = field.shoot(x, y);
+        if shot_result == ShotResult::Miss {
             turn_counter += 1;
         }
+        bot.shot_result(x, y, shot_result);
 
         if draw {
             sleep(Duration::from_millis(250));

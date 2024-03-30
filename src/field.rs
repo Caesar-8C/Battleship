@@ -18,6 +18,13 @@ impl fmt::Display for FieldCell {
     }
 }
 
+#[derive(PartialEq)]
+pub enum ShotResult {
+    Miss,
+    Hit,
+    Kill,
+}
+
 pub struct Field(
     Vec<Vec<FieldCell>>,
 );
@@ -41,7 +48,7 @@ impl Field {
     }
 
     pub fn get(&self, x: i32, y: i32) -> Option<FieldCell> {
-        if x < 0 || x > 9 || y < 0 || y > 9 {
+        if !(0..=9).contains(&x) || !(0..=9).contains(&y) {
             None
         } else {
             Some(self.0[x as usize][y as usize])
@@ -129,17 +136,17 @@ impl Field {
         )
     }
 
-    pub fn shoot(&mut self, x: usize, y: usize) -> bool {
-        match self.0[x][y] {
-            FieldCell::Ship(false) => {
-                self.0[x][y] = FieldCell::Ship(true);
-                true
+    pub fn shoot(&mut self, x: i32, y: i32) -> ShotResult {
+        match self.get(x, y) {
+            Some(FieldCell::Ship(false)) => {
+                self.set(x, y, FieldCell::Ship(true));
+                ShotResult::Hit
             }
-            FieldCell::NoShip(false) => {
-                self.0[x][y] = FieldCell::NoShip(true);
-                false
+            Some(FieldCell::NoShip(false)) => {
+                self.set(x, y, FieldCell::NoShip(true));
+                ShotResult::Miss
             }
-            _ => false,
+            _ => ShotResult::Miss,
         }
     }
 
@@ -150,7 +157,7 @@ impl Field {
                 row.iter().for_each(
                     |cell| s.push_str(&cell.to_string())
                 );
-                s.push_str("\n")
+                s.push('\n')
             }
         );
         s.push_str("==========");
