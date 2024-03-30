@@ -1,4 +1,5 @@
 pub mod random;
+pub mod alina;
 
 use crate::field::{Coord, ShotResult};
 
