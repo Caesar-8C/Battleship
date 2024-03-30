@@ -66,74 +66,58 @@ impl Field {
 
         for i in 0..size {
             match direction {
-                0 => self.set(x+i, y, FieldCell::Ship(false)),
-                _ => self.set(x, y+i, FieldCell::Ship(false)),
+                0 => self.set(x + i, y, FieldCell::Ship(false)),
+                _ => self.set(x, y + i, FieldCell::Ship(false)),
             }
         }
     }
 
     fn check_ship_validity(&self, x: i32, y: i32, size: i32, direction: u8) -> bool {
         for i in 0..size {
-                match direction {
-                    0 => {
-                        if x + size > 10 {
-                            return false;
-                        }
-                        if self.get(x+i, y).unwrap() != FieldCell::NoShip(false) {
-                            return false;
-                        }
-                    }
-                    _ => {
-                        if y + size > 10 {
-                            return false;
-                        }
-                        if self.get(x, y+i).unwrap() != FieldCell::NoShip(false) {
-                            return false;
-                        }
-                    }
+            let (x_i, y_i);
+            match direction {
+                0 => {
+                    x_i = x + i;
+                    y_i = y;
+                }
+                _ => {
+                    x_i = x;
+                    y_i = y + i;
                 }
             }
+            match self.get(x_i, y_i) {
+                Some(FieldCell::NoShip(_)) => (),
+                _ => return false,
+            }
+        }
 
-            for i in (-1)..(size+1) {
-                match direction {
-                    0 => {
-                        if x + i < 0 || x + i > 9 {
-                            continue;
-                        }
-                        if self.get(x+i, y).unwrap() != FieldCell::NoShip(false) {
-                            return false;
-                        }
-                        if y -1 >= 0 {
-                            if self.get(x + i, y - 1).unwrap() != FieldCell::NoShip(false) {
-                                return false;
-                            }
-                        }
-                        if y+1 < 10 {
-                            if self.get(x + i, y + 1).unwrap() != FieldCell::NoShip(false) {
-                                return false;
-                            }
-                        }
+        for i in (-1)..(size + 1) {
+            match direction {
+                0 => {
+                    if let Some(FieldCell::Ship(_)) = self.get(x + i, y) {
+                        return false;
                     }
-                    _ => {
-                        if y + i < 0 || y + i > 9 {
-                            continue;
-                        }
-                        if self.get(x, y+i).unwrap() != FieldCell::NoShip(false) {
-                            return false;
-                        }
-                        if x -1 >= 0 {
-                            if self.get(x - 1, y + i).unwrap() != FieldCell::NoShip(false) {
-                                return false;
-                            }
-                        }
-                        if x+1 < 10 {
-                            if self.get(x + 1, y + i).unwrap() != FieldCell::NoShip(false) {
-                                return false;
-                            }
-                        }
+                    if let Some(FieldCell::Ship(_)) = self.get(x + i, y - 1) {
+                        return false;
+                    }
+                    if let Some(FieldCell::Ship(_)) = self.get(x + i, y + 1) {
+                        return false;
+                    }
+                }
+                _ => {
+                    if let Some(FieldCell::Ship(_)) = self.get(x, y + i) {
+                        return false;
+                    }
+                    if let Some(FieldCell::Ship(_)) = self.get(x - 1, y + i) {
+                        return false;
+                    }
+                    if let Some(FieldCell::Ship(_)) = self.get(x + 1, y + i) {
+                        return false;
                     }
                 }
             }
+        }
+
         true
     }
 
