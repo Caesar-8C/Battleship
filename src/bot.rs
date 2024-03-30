@@ -2,7 +2,7 @@ pub mod random;
 
 use crate::field::{Coord, ShotResult};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 enum BotCell {
     Miss,
     Hit,
