@@ -186,16 +186,16 @@ impl Field {
     }
 
     fn is_ship_dead(&self, c: Coord) -> bool {
-        // let mut vec = vec![c];
-        // loop {
-        //     let mut new_vec = Vec::new();
-        //     vec.iter().for_each(|c| self.add_neighbors(*c, &mut new_vec));
-        //     vec = new_vec;
-        // }
-        false
+        Direction::ALL.iter().all(|direction| self.check_dead_direction(c, *direction))
     }
 
-    fn add_neighbors(&self, c: Coord, vec: &mut Vec<Coord>) {}
+    fn check_dead_direction(&self, c: Coord, direction: Direction) -> bool {
+        match self.get(c) {
+            Some(FieldCell::Ship(false)) => false,
+            Some(FieldCell::Ship(true)) => self.check_dead_direction(c.next(direction), direction),
+            _ => true,
+        }
+    }
 
     pub fn draw(&self) {
         let mut s = "".to_string();
