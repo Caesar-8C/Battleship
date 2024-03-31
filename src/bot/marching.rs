@@ -5,15 +5,15 @@ use crate::field::{Coord, Direction, ShotResult};
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
-pub struct Bot1 {
+pub struct MarchingBot {
     field: Vec<Vec<BotCell>>,
     first_hit: Option<Coord>,
 }
 
-impl Bot1 {
+impl MarchingBot {
     pub fn new() -> Self {
         Self {
-            field: vec![vec![Value(10); 10]; 10],
+            field: vec![vec![Value(0); 10]; 10],
             first_hit: None,
         }
     }
@@ -47,10 +47,37 @@ impl Bot1 {
         }
     }
 
-    fn devalue(&mut self, c: Coord) {
+    fn evaluate(&mut self) {
+        for x in 0..10 {
+            for y in 0..10 {
+                let c = Coord { x, y };
+                if let Value(_) = self.field[c.x_u()][c.y_u()] {
+                    self.evaluate_cell(c);
+                }
+            }
+        }
+    }
+
+    fn evaluate_cell(&mut self, c: Coord) {
+        let mut counter = 0;
+        self.march_direction(c.next(Up), Up, &mut counter);
+        self.march_direction(c.next(Down), Down, &mut counter);
+        self.march_direction(c.next(Left), Left, &mut counter);
+        self.march_direction(c.next(Right), Right, &mut counter);
+
+        self.field[c.x_u()][c.y_u()] = Value(counter);
+    }
+
+    fn march_direction(
+        &self,
+        c: Coord,
+        direction: Direction,
+        counter: &mut i32,
+    ) {
         if self.field_contains(c) {
-            if let Value(v) = self.field[c.x_u()][c.y_u()] {
-                self.field[c.x_u()][c.y_u()] = Value(v - 1);
+            if let Value(_) = self.field[c.x_u()][c.y_u()] {
+                *counter += 1;
+                self.march_direction(c.next(direction), direction, counter);
             }
         }
     }
@@ -73,45 +100,52 @@ impl Bot1 {
             }
         }
 
-        *vec.choose(&mut rand::thread_rng()).unwrap()
+        *vec.choose(&mut thread_rng()).unwrap()
     }
 
-    fn march(&self, c: Coord) -> Coord {
-        let mut vec = Direction::ALL;
+    fn march_after_hit(&self, c: Coord) -> Coord {
+        let mut vec = [Left, Right, Up, Down];
         vec.shuffle(&mut thread_rng());
 
-        if let Some(res) = self.march_direction(c, vec[0]) {
+        if let Some(res) = self.march_direction_after_hit(c, vec[0]) {
             return res;
         }
-        if let Some(res) = self.march_direction(c, vec[1]) {
+        if let Some(res) = self.march_direction_after_hit(c, vec[1]) {
             return res;
         }
-        if let Some(res) = self.march_direction(c, vec[2]) {
+        if let Some(res) = self.march_direction_after_hit(c, vec[2]) {
             return res;
         }
-        if let Some(res) = self.march_direction(c, vec[3]) {
+        if let Some(res) = self.march_direction_after_hit(c, vec[3]) {
             return res;
         }
         panic!("Bot logic failure");
     }
 
-    fn march_direction(&self, c: Coord, direction: Direction) -> Option<Coord> {
-        if !self.field_contains(c) {
+    fn march_direction_after_hit(
+        &self,
+        c: Coord,
+        direction: Direction,
+    ) -> Option<Coord> {
+        if !(0..=9).contains(&c.x) || !(0..=9).contains(&c.y) {
             return None;
         }
         match self.field[c.x_u()][c.y_u()] {
-            Hit => self.march_direction(c.next(direction), direction),
+            Hit => self.march_direction_after_hit(c.next(direction), direction),
             Miss => None,
             Value(_) => Some(c),
         }
     }
 }
 
-impl Bot for Bot1 {
+impl Bot for MarchingBot {
     fn turn(&mut self) -> Coord {
         match self.first_hit {
-            Some(c) => self.march(c),
-            None => self.pick_target(),
+            Some(c) => self.march_after_hit(c),
+            None => {
+                self.evaluate();
+                self.pick_target()
+            }
         }
     }
 
@@ -127,17 +161,7 @@ impl Bot for Bot1 {
                     self.first_hit = Some(c);
                 }
             }
-            ShotResult::Miss => {
-                self.field[c.x_u()][c.y_u()] = Miss;
-                self.devalue(c.next(Up));
-                self.devalue(c.next(Down));
-                self.devalue(c.next(Left));
-                self.devalue(c.next(Right));
-                self.devalue(c.next(Up).next(Left));
-                self.devalue(c.next(Up).next(Right));
-                self.devalue(c.next(Down).next(Left));
-                self.devalue(c.next(Down).next(Right));
-            }
+            ShotResult::Miss => self.field[c.x_u()][c.y_u()] = Miss,
             ShotResult::Kill => {
                 self.field[c.x_u()][c.y_u()] = Hit;
                 self.first_hit = None;

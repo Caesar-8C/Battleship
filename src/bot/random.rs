@@ -15,8 +15,12 @@ impl RandomBot {
         }
     }
 
+    fn field_contains(&self, c: Coord) -> bool {
+        (0..=9).contains(&c.x) && (0..=9).contains(&c.y)
+    }
+
     fn mark_dead(&mut self, c: Coord, direction: Direction) {
-        if (0..=9).contains(&c.x) && (0..=9).contains(&c.y) {
+        if self.field_contains(c) {
             if self.field[c.x_u()][c.y_u()] == Hit {
                 self.mark_miss(c.next(Up));
                 self.mark_miss(c.next(Down));
@@ -33,7 +37,7 @@ impl RandomBot {
     }
 
     fn mark_miss(&mut self, c: Coord) {
-        if (0..=9).contains(&c.x) && (0..=9).contains(&c.y) {
+        if self.field_contains(c) {
             if let Value(_) = self.field[c.x_u()][c.y_u()] {
                 self.field[c.x_u()][c.y_u()] = Miss;
             }
