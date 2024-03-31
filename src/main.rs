@@ -9,6 +9,7 @@ use crate::field::{Field, ShotResult};
 use std::env;
 use std::thread::sleep;
 use std::time::Duration;
+use crate::bot::bot2::Bot2;
 
 fn play(draw: bool, bot: &mut dyn Bot) -> i32 {
     let mut field = Field::new();
@@ -54,6 +55,14 @@ fn main() {
                 let moves = play(true, &mut AlinaBot::new());
                 println!("AlinaBot won in {moves} moves");
             }
+            _ if args[1] == "bot1" => {
+                let moves = play(true, &mut Bot1::new());
+                println!("Bot1 won in {moves} moves");
+            }
+            _ if args[1] == "bot2" => {
+                let moves = play(true, &mut Bot2::new());
+                println!("Bot2 won in {moves} moves");
+            }
             _ => return,
         }
         return;
@@ -82,4 +91,12 @@ fn main() {
     let sum: i32 = vec.iter().sum();
     let avg = sum as f64 / (vec.len() as f64);
     println!("Bot1 won in {avg} moves on average");
+
+    vec.clear();
+    for _ in 0..1000 {
+        vec.push(play(false, &mut Bot2::new()));
+    }
+    let sum: i32 = vec.iter().sum();
+    let avg = sum as f64 / (vec.len() as f64);
+    println!("Bot2 won in {avg} moves on average");
 }
