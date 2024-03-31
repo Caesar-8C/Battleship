@@ -2,6 +2,7 @@ pub mod alina;
 pub mod bot1;
 pub mod bot2;
 pub mod random;
+pub mod bot3;
 
 use crate::field::{Coord, ShotResult};
 

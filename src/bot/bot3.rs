@@ -5,15 +5,15 @@ use crate::field::{Coord, Direction, ShotResult};
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
-pub struct Bot1 {
+pub struct Bot3 {
     field: Vec<Vec<BotCell>>,
     first_hit: Option<Coord>,
 }
 
-impl Bot1 {
+impl Bot3 {
     pub fn new() -> Self {
         Self {
-            field: vec![vec![Value(10); 10]; 10],
+            field: vec![vec![Value(0); 10]; 10],
             first_hit: None,
         }
     }
@@ -43,10 +43,43 @@ impl Bot1 {
         }
     }
 
-    fn devalue(&mut self, c: Coord) {
+    fn evaluate(&mut self) {
+        for x in 0..10 {
+            for y in 0..10 {
+                let c = Coord { x, y };
+                if let Value(_) = self.field[c.x_u()][c.y_u()] {
+                    self.evaluate_cell(c);
+                }
+            }
+        }
+    }
+
+    fn evaluate_cell(&mut self, c: Coord) {
+        let mut counter = 0;
+        self.evaluate_neighbor(c.next(Up), &mut counter);
+        self.evaluate_neighbor(c.next(Down), &mut counter);
+        self.evaluate_neighbor(c.next(Left), &mut counter);
+        self.evaluate_neighbor(c.next(Right), &mut counter);
+        self.evaluate_neighbor(c.next(Up).next(Left), &mut counter);
+        self.evaluate_neighbor(c.next(Up).next(Right), &mut counter);
+        self.evaluate_neighbor(c.next(Down).next(Left), &mut counter);
+        self.evaluate_neighbor(c.next(Down).next(Right), &mut counter);
+
+        self.field[c.x_u()][c.y_u()] = Value(counter);
+    }
+
+    fn evaluate_neighbor(&self, c: Coord, counter: &mut i32) {
         if (0..=9).contains(&c.x) && (0..=9).contains(&c.y) {
-            if let Value(v) = self.field[c.x_u()][c.y_u()] {
-                self.field[c.x_u()][c.y_u()] = Value(v - 1);
+            match self.field[c.x_u()][c.y_u()] {
+                Value(_) => {
+                    if *counter < 10 {
+                        *counter += 1;
+                    }
+                }
+                Hit => {
+                    *counter = 10;
+                }
+                Miss => (),
             }
         }
     }
@@ -69,7 +102,7 @@ impl Bot1 {
             }
         }
 
-        *vec.choose(&mut rand::thread_rng()).unwrap()
+        *vec.choose(&mut thread_rng()).unwrap()
     }
 
     fn march(&self, c: Coord) -> Coord {
@@ -103,11 +136,14 @@ impl Bot1 {
     }
 }
 
-impl Bot for Bot1 {
+impl Bot for Bot3 {
     fn turn(&mut self) -> Coord {
         match self.first_hit {
             Some(c) => self.march(c),
-            None => self.pick_target(),
+            None => {
+                self.evaluate();
+                self.pick_target()
+            }
         }
     }
 
@@ -123,17 +159,7 @@ impl Bot for Bot1 {
                     self.first_hit = Some(c);
                 }
             }
-            ShotResult::Miss => {
-                self.field[c.x_u()][c.y_u()] = Miss;
-                self.devalue(c.next(Up));
-                self.devalue(c.next(Down));
-                self.devalue(c.next(Left));
-                self.devalue(c.next(Right));
-                self.devalue(c.next(Up).next(Left));
-                self.devalue(c.next(Up).next(Right));
-                self.devalue(c.next(Down).next(Left));
-                self.devalue(c.next(Down).next(Right));
-            }
+            ShotResult::Miss => self.field[c.x_u()][c.y_u()] = Miss,
             ShotResult::Kill => {
                 self.field[c.x_u()][c.y_u()] = Hit;
                 self.first_hit = None;
