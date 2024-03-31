@@ -1,8 +1,8 @@
+use crate::bot::BotCell::{Hit, Miss, Value};
 use crate::bot::{Bot, BotCell};
-use rand::Rng;
-use crate::bot::BotCell::{Miss, Value, Hit};
-use crate::field::{Coord, Direction, ShotResult};
 use crate::field::Direction::{Down, Left, Right, Up};
+use crate::field::{Coord, Direction, ShotResult};
+use rand::Rng;
 
 pub struct RandomBot {
     field: Vec<Vec<BotCell>>,
@@ -60,7 +60,9 @@ impl Bot for RandomBot {
             ShotResult::Miss => self.field[c.x_u()][c.y_u()] = Miss,
             ShotResult::Kill => {
                 self.field[c.x_u()][c.y_u()] = Hit;
-                Direction::ALL.iter().for_each(|direction| self.mark_dead(c, *direction));
+                Direction::ALL
+                    .iter()
+                    .for_each(|direction| self.mark_dead(c, *direction));
             }
         }
     }

@@ -1,5 +1,6 @@
-pub mod random;
 pub mod alina;
+pub mod bot1;
+pub mod random;
 
 use crate::field::{Coord, ShotResult};
 

@@ -1,13 +1,14 @@
 mod bot;
 mod field;
 
+use crate::bot::alina::AlinaBot;
+use crate::bot::bot1::Bot1;
+use crate::bot::random::RandomBot;
+use crate::bot::Bot;
+use crate::field::{Field, ShotResult};
 use std::env;
 use std::thread::sleep;
 use std::time::Duration;
-use crate::bot::alina::AlinaBot;
-use crate::bot::Bot;
-use crate::bot::random::RandomBot;
-use crate::field::{Field, ShotResult};
 
 fn play(draw: bool, bot: &mut dyn Bot) -> i32 {
     let mut field = Field::new();
@@ -73,4 +74,12 @@ fn main() {
     let sum: i32 = vec.iter().sum();
     let avg = sum as f64 / (vec.len() as f64);
     println!("AlinaBot won in {avg} moves on average");
+
+    vec.clear();
+    for _ in 0..1000 {
+        vec.push(play(false, &mut Bot1::new()));
+    }
+    let sum: i32 = vec.iter().sum();
+    let avg = sum as f64 / (vec.len() as f64);
+    println!("Bot1 won in {avg} moves on average");
 }
