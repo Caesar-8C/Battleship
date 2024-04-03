@@ -74,9 +74,7 @@ impl Bot2 {
         if self.field_contains(c) {
             match self.field[c.x_u()][c.y_u()] {
                 Miss => {
-                    if *counter < 10 {
-                        *counter += 1;
-                    }
+                    *counter += 1;
                 }
                 Hit => {
                     *counter = 10;

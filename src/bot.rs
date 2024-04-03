@@ -1,9 +1,10 @@
 pub mod alina;
 pub mod bot1;
 pub mod bot2;
-pub mod random;
 pub mod bot3;
 pub mod marching;
+pub mod random;
+pub mod three_step;
 
 use crate::field::{Coord, ShotResult};
 
